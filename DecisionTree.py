@@ -3,9 +3,7 @@ import sys
 import random
 import numpy as np
 from sklearn.model_selection import KFold
-# from sklearn import tree
 from collections import Counter
-
 
 # Class for instances with operations
 class Instances(object):
@@ -15,8 +13,9 @@ class Instances(object):
         self.num_attrs = -1
         self.num_instances = 0
         self.attr_set = []
-        self.dic = {'republican':0, 'democrat':1, 'n':0, 'y':1, '?':2,
-                    'positive':0, 'negative':1, 'o':0, 'x':1, 'b':2}
+        self.dic = {'republican': 0, 'democrat': 1, 'n': 0, 'y': 1, '?': 2,
+                    'positive': 0, 'negative': 1, 'o': 0, 'x': 1, 'b': 2,
+                    'Republican': 0, 'Democrat': 1, 'N': 0, 'Y': 1, }
 
     def add_instance(self, _lbl, _attrs):
         self.label.append(_lbl)
@@ -66,7 +65,6 @@ class Instances(object):
         return res
 
 
-
 def compute_entropy(data: Instances):
     total_entropy = 0.0
     ########## Please Fill Missing Lines Here ##########
@@ -86,8 +84,10 @@ def compute_info_gain(data: Instances, att_idx):
     old = compute_entropy(data)
     n = data.num_instances
     splits = data.split(att_idx)
-    new = np.sum([compute_entropy(x) * x.num_instances / n for x in splits.values() if x.num_instances])
+    tmp = [compute_entropy(x) * x.num_instances / n for x in splits.values() if x.num_instances]
+    new = np.sum(tmp)
     info_gain = old - new
+
     return info_gain
 
 
@@ -117,6 +117,8 @@ class DecisionTree(object):
         self.make_tree()
 
     def make_tree(self):
+        global out
+        out = ''
         if self.instances.num_instances == 0:
             # No any instance for this node
             self.m_class = '**MISSING**'
@@ -165,10 +167,6 @@ if __name__ == '__main__':
         train_data = data.get_subset(train_keys)
         test_data = data.get_subset(test_keys)
         n_fold += 1
-        # clf = tree.DecisionTreeClassifier()
-        # clf.fit(train_data.attrs, train_data.label)
-        # predictions = clf.predict(test_data.attrs)
-        # benchmark tests
         model = DecisionTree(train_data, sel_func)
         predictions = [model.classify(test_data.attrs[i]) for i in range(test_data.num_instances)]
         num_correct_predictions = sum(
